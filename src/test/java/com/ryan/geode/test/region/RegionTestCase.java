@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Rayn
@@ -23,7 +24,7 @@ public class RegionTestCase {
 
 
     private String host = "localhost";
-    private String port = "10334";
+    private int port = 40412;
 
     private ClientCache cache = null;
 
@@ -31,8 +32,7 @@ public class RegionTestCase {
     public void setUp() throws Exception {
 
         ClientCacheFactory cacheFactory = new ClientCacheFactory();
-//        cacheFactory.addPoolLocator("localhost", 10334);
-        cacheFactory.addPoolServer("localhost", 10334);
+        cacheFactory.addPoolServer(host, port);
         cache = cacheFactory.create();
 
     }
@@ -47,13 +47,12 @@ public class RegionTestCase {
     @Test
     public void testCreateRegion() throws Exception {
 
-        Region<String, String> region = cache.<String, String>createClientRegionFactory(ClientRegionShortcut.CACHING_PROXY).create("region");
-
-        RegionAttributes<String, String> attributes = region.getAttributes();
+        Region<String, String> region = cache.<String, String>createClientRegionFactory(ClientRegionShortcut.CACHING_PROXY_OVERFLOW).create("region1");
 
 
-        String diskStoreName = attributes.getDiskStoreName();
-
+        for (Map.Entry<String, String> entry : region.entrySet()) {
+            System.out.format("结果：key = %s, value = %s\n", entry.getKey(), entry.getValue());
+        }
 
     }
 
@@ -63,10 +62,10 @@ public class RegionTestCase {
      */
     @Test
     public void testPutData() throws Exception {
-        Region<String, String> region = cache.<String, String>createClientRegionFactory(ClientRegionShortcut.CACHING_PROXY).create("region");
-
-        region.put("1", "Hello");
-        region.put("2", "World");
+        Region<String, String> region = cache.<String, String>createClientRegionFactory(ClientRegionShortcut.CACHING_PROXY_HEAP_LRU).create("region1");
+//
+//        region.put("7", "77777");
+//        region.put("8", "88888");
 
         for (Map.Entry<String, String> entry : region.entrySet()) {
             System.out.format("key = %s, value = %s\n", entry.getKey(), entry.getValue());
